@@ -16,8 +16,9 @@ const CONFIG = {
     // GitHub Gist configuration
     github: {
         // You need to create a public Gist and put its ID here
+        // Current Gist: https://gist.github.com/letiendat1516/cf16e4873c813f9a5763b834d7ab6061
         // Example: https://gist.github.com/username/abc123def456 -> gistId is "abc123def456"
-        gistId: "cf16e4873c813f9a5763b834d7ab6061", // Replace with your actual Gist ID
+        gistId: "cf16e4873c813f9a5763b834d7ab6061", // GitHub Gist ID (32-character hex string)
         filename: "puzzle_state.json", // Filename in the Gist
         
         // GitHub API endpoints
@@ -77,12 +78,19 @@ const ConfigHelper = {
         return `${CONFIG.github.apiBase}/gists/${CONFIG.github.gistId}`;
     },
 
+    // Get full Gist URL for debugging and reference
+    getFullGistUrl() {
+        return `https://gist.github.com/letiendat1516/${CONFIG.github.gistId}`;
+    },
+
     // Validate configuration
     isValid() {
         const errors = [];
         
         if (!CONFIG.github.gistId || CONFIG.github.gistId === "YOUR_GIST_ID_HERE") {
             errors.push("GitHub Gist ID is not configured");
+        } else if (!this.isValidGistId(CONFIG.github.gistId)) {
+            errors.push("GitHub Gist ID format is invalid (must be 32-character hex string)");
         }
         
         if (!CONFIG.puzzle.question || CONFIG.puzzle.question.trim() === "") {
@@ -94,11 +102,21 @@ const ConfigHelper = {
         }
         
         if (errors.length > 0) {
-            console.error("Configuration errors:", errors);
+            console.error("Configuration validation failed:", errors);
             return false;
         }
         
         return true;
+    },
+
+    // Validate Gist ID format (32-character hex string)
+    isValidGistId(gistId) {
+        if (typeof gistId !== 'string') {
+            return false;
+        }
+        // Gist IDs are 32-character hexadecimal strings
+        const gistIdPattern = /^[a-f0-9]{32}$/i;
+        return gistIdPattern.test(gistId);
     },
 
     // Sanitize user input
