@@ -16,10 +16,12 @@ const CONFIG = {
     // GitHub Gist configuration
     github: {
         // Current Gist: https://gist.github.com/letiendat1516/cf16e4873c813f9a5763b834d7ab6061
-        // Gist ID extracted from the URL above
         gistId: "cf16e4873c813f9a5763b834d7ab6061",
-        filename: "puzzle_state.json", // Filename in the Gist
-        owner: "letiendat1516", // Gist owner for reference
+        filename: "puzzle_state.json",
+        owner: "letiendat1516",
+        
+        // GitHub Personal Access Token với quyền gist
+        token: "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",
         
         // GitHub API endpoints
         apiBase: "https://api.github.com",
@@ -27,14 +29,14 @@ const CONFIG = {
         
         // Rate limiting settings
         maxRetries: 3,
-        retryDelay: 1000 // milliseconds
+        retryDelay: 1000
     },
 
     // UI configuration
     ui: {
-        loadingTimeout: 5000, // 5 seconds
-        messageTimeout: 5000, // 5 seconds
-        animationDuration: 300 // milliseconds
+        loadingTimeout: 5000,
+        messageTimeout: 5000,
+        animationDuration: 300
     },
 
     // Validation rules
@@ -51,24 +53,19 @@ const CONFIG = {
             maxLength: 200
         },
         gistId: {
-            // Gist ID should be 32 character hexadecimal string
             pattern: /^[a-f0-9]{32}$/
         }
     },
 
     // Security settings
     security: {
-        // XSS protection - HTML tags will be stripped
         allowedChars: /^[a-zA-Z0-9\s\u00C0-\u1EF9@._-]+$/,
-        
-        // Rate limiting for submissions
-        submissionCooldown: 3000 // 3 seconds between submissions
+        submissionCooldown: 3000
     }
 };
 
 // Helper functions for configuration
 const ConfigHelper = {
-    // Decode the answer for checking
     getCorrectAnswer() {
         try {
             return atob(CONFIG.puzzle.encodedAnswer);
@@ -78,29 +75,25 @@ const ConfigHelper = {
         }
     },
 
-    // Get Gist API URL for API calls
     getGistUrl() {
         return `${CONFIG.github.apiBase}/gists/${CONFIG.github.gistId}`;
     },
 
-    // Get full Gist URL for browser access
     getFullGistUrl() {
         return `${CONFIG.github.gistBase}/${CONFIG.github.owner}/${CONFIG.github.gistId}`;
     },
 
-    // Validate Gist ID format
     isValidGistId(gistId) {
         return CONFIG.validation.gistId.pattern.test(gistId);
     },
 
-    // Validate configuration
     isValid() {
         const errors = [];
         
-        if (!CONFIG.github.gistId || CONFIG.github.gistId === "cf16e4873c813f9a5763b834d7ab6061") {
+        if (!CONFIG.github.gistId || CONFIG.github.gistId === "YOUR_GIST_ID_HERE") {
             errors.push("GitHub Gist ID is not configured");
         } else if (!this.isValidGistId(CONFIG.github.gistId)) {
-            errors.push("GitHub Gist ID format is invalid (must be 32 character hex string)");
+            errors.push("GitHub Gist ID format is invalid");
         }
         
         if (!CONFIG.github.owner || CONFIG.github.owner.trim() === "") {
@@ -115,9 +108,12 @@ const ConfigHelper = {
             errors.push("Puzzle answer is not configured");
         }
         
+        if (!CONFIG.github.token || CONFIG.github.token === "YOUR_GITHUB_TOKEN_HERE") {
+            errors.push("GitHub token is not configured");
+        }
+        
         if (errors.length > 0) {
             console.error("Configuration errors:", errors);
-            console.log("Current Gist URL:", this.getFullGistUrl());
             return false;
         }
         
@@ -125,39 +121,33 @@ const ConfigHelper = {
         return true;
     },
 
-    // Sanitize user input
     sanitizeInput(input) {
         if (typeof input !== 'string') {
             return '';
         }
         
-        // Remove HTML tags and validate characters
         return input
-            .replace(/<[^>]*>/g, '') // Remove HTML tags
+            .replace(/<[^>]*>/g, '')
             .trim()
-            .substring(0, 200); // Limit length
+            .substring(0, 200);
     },
 
-    // Validate email format
     isValidEmail(email) {
         return CONFIG.validation.email.pattern.test(email);
     },
 
-    // Validate name
     isValidName(name) {
         const sanitized = this.sanitizeInput(name);
         return sanitized.length >= CONFIG.validation.name.minLength && 
                sanitized.length <= CONFIG.validation.name.maxLength;
     },
 
-    // Validate answer
     isValidAnswer(answer) {
         const sanitized = this.sanitizeInput(answer);
         return sanitized.length >= CONFIG.validation.answer.minLength && 
                sanitized.length <= CONFIG.validation.answer.maxLength;
     },
 
-    // Get configuration info for debugging
     getConfigInfo() {
         return {
             gistId: CONFIG.github.gistId,
@@ -165,15 +155,14 @@ const ConfigHelper = {
             gistApiUrl: this.getGistUrl(),
             gistBrowserUrl: this.getFullGistUrl(),
             filename: CONFIG.github.filename,
+            hasToken: !!CONFIG.github.token,
             isValid: this.isValid()
         };
     }
 };
 
-// Export configuration for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CONFIG, ConfigHelper };
 }
 
-// Log configuration status on load
 console.log('Puzzle Game Configuration loaded:', ConfigHelper.getConfigInfo());
