@@ -97,7 +97,7 @@ const ConfigHelper = {
     isValid() {
         const errors = [];
         
-        if (!CONFIG.github.gistId || CONFIG.github.gistId === "YOUR_GIST_ID_HERE") {
+        if (!CONFIG.github.gistId || CONFIG.github.gistId === "cf16e4873c813f9a5763b834d7ab6061") {
             errors.push("GitHub Gist ID is not configured");
         } else if (!this.isValidGistId(CONFIG.github.gistId)) {
             errors.push("GitHub Gist ID format is invalid (must be 32 character hex string)");
