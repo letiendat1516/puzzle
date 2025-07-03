@@ -68,7 +68,13 @@ class PuzzleGame {
     async checkGameState() {
         try {
             this.isLoading = true;
-            const response = await this.fetchWithRetry(ConfigHelper.getGistUrl());
+            const response = await this.fetchWithRetry(ConfigHelper.getGistUrl(), {
+                headers: {
+                    'Authorization': `Bearer ${CONFIG.github.token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -119,20 +125,20 @@ class PuzzleGame {
 
         if (this.state.isCompleted && this.state.winner) {
             // Game is completed
-            openStatus.style.display = 'none';
-            closedStatus.style.display = 'block';
-            puzzleSection.style.display = 'none';
-            winnerSection.style.display = 'block';
-            congratsSection.style.display = 'none';
+            if (openStatus) openStatus.style.display = 'none';
+            if (closedStatus) closedStatus.style.display = 'block';
+            if (puzzleSection) puzzleSection.style.display = 'none';
+            if (winnerSection) winnerSection.style.display = 'block';
+            if (congratsSection) congratsSection.style.display = 'none';
             
             this.displayWinnerInfo();
         } else {
             // Game is still open
-            openStatus.style.display = 'block';
-            closedStatus.style.display = 'none';
-            puzzleSection.style.display = 'block';
-            winnerSection.style.display = 'none';
-            congratsSection.style.display = 'none';
+            if (openStatus) openStatus.style.display = 'block';
+            if (closedStatus) closedStatus.style.display = 'none';
+            if (puzzleSection) puzzleSection.style.display = 'block';
+            if (winnerSection) winnerSection.style.display = 'none';
+            if (congratsSection) congratsSection.style.display = 'none';
         }
     }
 
@@ -159,14 +165,14 @@ class PuzzleGame {
         const form = document.getElementById('answer-form');
         if (form) {
             form.addEventListener('submit', (e) => this.handleSubmit(e));
-        }
 
-        // Input validation
-        const inputs = form.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => this.validateInput(input));
-            input.addEventListener('blur', () => this.validateInput(input));
-        });
+            // Input validation
+            const inputs = form.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => this.validateInput(input));
+                input.addEventListener('blur', () => this.validateInput(input));
+            });
+        }
     }
 
     validateInput(input) {
@@ -281,7 +287,9 @@ class PuzzleGame {
                 this.hideLoading();
                 this.showCongratulations();
             } else {
-                throw new Error('Failed to update Gist');
+                const errorText = await updateResponse.text();
+                console.error('Gist update failed:', updateResponse.status, errorText);
+                throw new Error(`Failed to update Gist: ${updateResponse.status} ${updateResponse.statusText}`);
             }
 
         } catch (error) {
@@ -302,10 +310,17 @@ class PuzzleGame {
             }
         };
 
+        console.log('Updating gist with payload:', payload);
+        console.log('Gist URL:', ConfigHelper.getGistUrl());
+
         return await this.fetchWithRetry(ConfigHelper.getGistUrl(), {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${CONFIG.github.token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+                'User-Agent': 'PuzzleGame/1.0'
             },
             body: JSON.stringify(payload)
         });
@@ -385,7 +400,53 @@ function hideSuccess() {
     }
 }
 
+// Debug function to test API connectivity
+async function testGistConnection() {
+    try {
+        console.log('Testing Gist connection...');
+        console.log('Gist URL:', ConfigHelper.getGistUrl());
+        console.log('Has token:', !!CONFIG.github.token);
+        
+        const response = await fetch(ConfigHelper.getGistUrl(), {
+            headers: {
+                'Authorization': `Bearer ${CONFIG.github.token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Gist data:', data);
+            return true;
+        } else {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            return false;
+        }
+    } catch (error) {
+        console.error('Connection test failed:', error);
+        return false;
+    }
+}
+
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing puzzle game...');
+    
+    // Test connection in development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        console.log('Development mode detected, testing gist connection...');
+        testGistConnection();
+    }
+    
     new PuzzleGame();
 });
+
+// Export for testing if in Node.js environment
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { PuzzleGame, testGistConnection };
+}
