@@ -15,13 +15,15 @@ const CONFIG = {
 
     // GitHub Gist configuration
     github: {
-        // You need to create a public Gist and put its ID here
-        // Example: https://gist.github.com/username/abc123def456 -> gistId is "abc123def456"
-        gistId: "cf16e4873c813f9a5763b834d7ab6061", // Replace with your actual Gist ID
+        // Current Gist: https://gist.github.com/letiendat1516/cf16e4873c813f9a5763b834d7ab6061
+        // Gist ID extracted from the URL above
+        gistId: "cf16e4873c813f9a5763b834d7ab6061",
         filename: "puzzle_state.json", // Filename in the Gist
+        owner: "letiendat1516", // Gist owner for reference
         
         // GitHub API endpoints
         apiBase: "https://api.github.com",
+        gistBase: "https://gist.github.com",
         
         // Rate limiting settings
         maxRetries: 3,
@@ -47,6 +49,10 @@ const CONFIG = {
         answer: {
             minLength: 1,
             maxLength: 200
+        },
+        gistId: {
+            // Gist ID should be 32 character hexadecimal string
+            pattern: /^[a-f0-9]{32}$/
         }
     },
 
@@ -72,9 +78,19 @@ const ConfigHelper = {
         }
     },
 
-    // Get Gist API URL
+    // Get Gist API URL for API calls
     getGistUrl() {
         return `${CONFIG.github.apiBase}/gists/${CONFIG.github.gistId}`;
+    },
+
+    // Get full Gist URL for browser access
+    getFullGistUrl() {
+        return `${CONFIG.github.gistBase}/${CONFIG.github.owner}/${CONFIG.github.gistId}`;
+    },
+
+    // Validate Gist ID format
+    isValidGistId(gistId) {
+        return CONFIG.validation.gistId.pattern.test(gistId);
     },
 
     // Validate configuration
@@ -83,6 +99,12 @@ const ConfigHelper = {
         
         if (!CONFIG.github.gistId || CONFIG.github.gistId === "YOUR_GIST_ID_HERE") {
             errors.push("GitHub Gist ID is not configured");
+        } else if (!this.isValidGistId(CONFIG.github.gistId)) {
+            errors.push("GitHub Gist ID format is invalid (must be 32 character hex string)");
+        }
+        
+        if (!CONFIG.github.owner || CONFIG.github.owner.trim() === "") {
+            errors.push("GitHub Gist owner is not configured");
         }
         
         if (!CONFIG.puzzle.question || CONFIG.puzzle.question.trim() === "") {
@@ -95,9 +117,11 @@ const ConfigHelper = {
         
         if (errors.length > 0) {
             console.error("Configuration errors:", errors);
+            console.log("Current Gist URL:", this.getFullGistUrl());
             return false;
         }
         
+        console.log("Configuration is valid. Gist URL:", this.getFullGistUrl());
         return true;
     },
 
@@ -131,6 +155,18 @@ const ConfigHelper = {
         const sanitized = this.sanitizeInput(answer);
         return sanitized.length >= CONFIG.validation.answer.minLength && 
                sanitized.length <= CONFIG.validation.answer.maxLength;
+    },
+
+    // Get configuration info for debugging
+    getConfigInfo() {
+        return {
+            gistId: CONFIG.github.gistId,
+            gistOwner: CONFIG.github.owner,
+            gistApiUrl: this.getGistUrl(),
+            gistBrowserUrl: this.getFullGistUrl(),
+            filename: CONFIG.github.filename,
+            isValid: this.isValid()
+        };
     }
 };
 
@@ -138,3 +174,6 @@ const ConfigHelper = {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CONFIG, ConfigHelper };
 }
+
+// Log configuration status on load
+console.log('Puzzle Game Configuration loaded:', ConfigHelper.getConfigInfo());
