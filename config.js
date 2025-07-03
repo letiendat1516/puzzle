@@ -17,7 +17,7 @@ const CONFIG = {
     github: {
         // You need to create a public Gist and put its ID here
         // Example: https://gist.github.com/username/abc123def456 -> gistId is "abc123def456"
-        gistId: "YOUR_GIST_ID_HERE", // Replace with your actual Gist ID
+        gistId: "cf16e4873c813f9a5763b834d7ab6061", // Replace with your actual Gist ID
         filename: "puzzle_state.json", // Filename in the Gist
         
         // GitHub API endpoints
