@@ -41,7 +41,7 @@ puzzle/
 
 1. Truy cập [gist.github.com](https://gist.github.com)
 2. Tạo một Gist mới với:
-   - **Filename**: `puzzle_state.json`
+   - **Filename**: `puzzle-state.json`
    - **Content**: 
    ```json
    {
@@ -61,7 +61,7 @@ puzzle/
    ```javascript
    github: {
        gistId: "abc123def456", // Thay bằng ID Gist của bạn
-       filename: "puzzle_state.json",
+       filename: "puzzle-state.json",
        // ...
    }
    ```
@@ -164,7 +164,7 @@ Mở `style.css` và thay đổi:
 ### Lỗi "Cấu hình ứng dụng chưa đúng"
 - Kiểm tra `gistId` trong `config.js`
 - Đảm bảo Gist được đặt ở chế độ Public
-- Kiểm tra format của `puzzle_state.json`
+- Kiểm tra format của `puzzle-state.json`
 
 ### Lỗi "Không thể kiểm tra trạng thái game"
 - Kiểm tra kết nối internet
