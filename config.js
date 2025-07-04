@@ -21,7 +21,7 @@ const CONFIG = {
       owner: "letiendat1516",
       
       // ✅ Updated GitHub Personal Access Token
-      token: "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",
+      token: "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",
       
       // GitHub API endpoints
       apiBase: "https://api.github.com",
