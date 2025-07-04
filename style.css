@@ -1,536 +1,627 @@
 /* Reset and Base Styles */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* Header Styles */
 .header {
-    text-align: center;
-    margin-bottom: 40px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 40px 20px;
-    box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
-    backdrop-filter: blur(10px);
+  text-align: center;
+  margin-bottom: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 40px 20px;
+  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+  backdrop-filter: blur(10px);
 }
 
 .header-content h1 {
-    color: #007bff;
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  color: #007bff;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-icon {
-    font-size: 4rem;
-    color: #007bff;
-    margin-bottom: 20px;
-    animation: pulse 2s infinite;
+  font-size: 4rem;
+  color: #007bff;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
 }
 
 .subtitle {
-    font-size: 1.2rem;
-    color: #6c757d;
-    font-weight: 500;
+  font-size: 1.2rem;
+  color: #6c757d;
+  font-weight: 500;
 }
 
-/* Loading Overlay */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 123, 255, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    color: white;
+/* Loading Message */
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  color: #007bff;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255, 255, 255, 0.3);
-    border-top: 5px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
+/* Game Status Styles */
+.game-status {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
-/* Status Cards */
-.status-section {
-    margin-bottom: 30px;
+.status-open {
+  border-left: 5px solid #28a745;
+  background: linear-gradient(45deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
 }
 
-.status-card {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+.status-closed {
+  border-left: 5px solid #dc3545;
+  background: linear-gradient(45deg, rgba(220, 53, 69, 0.1), rgba(255, 0, 0, 0.1));
 }
 
-.status-card:hover {
-    transform: translateY(-5px);
+.status-winner {
+  border-left: 5px solid #ffc107;
+  background: linear-gradient(45deg, rgba(255, 193, 7, 0.1), rgba(255, 235, 59, 0.1));
 }
 
-.status-card i {
-    font-size: 3rem;
-    margin-bottom: 20px;
+.game-status h3 {
+  color: #007bff;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
 }
 
-.status-open i {
-    color: #28a745;
+.game-status h3 i {
+  margin-right: 10px;
+  font-size: 1.5rem;
 }
 
-.status-closed i {
-    color: #dc3545;
+.game-status p {
+  color: #6c757d;
+  margin-bottom: 0;
+  font-size: 1.1rem;
 }
 
-.status-card h2 {
-    color: #333;
-    margin-bottom: 10px;
-    font-size: 1.8rem;
+/* Winner Info in Status */
+.winner-info-status {
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 15px;
 }
 
-.status-card p {
-    color: #6c757d;
-    font-size: 1.1rem;
+.winner-info-status h4 {
+  color: #333;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.winner-info-status h4 i {
+  color: #ffc107;
+  margin-right: 8px;
+}
+
+.winner-details-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.winner-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.winner-time {
+  color: #6c757d;
+  font-size: 0.95rem;
 }
 
 /* Puzzle Section */
 .puzzle-section {
-    margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 
 .puzzle-card {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .puzzle-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .puzzle-header i {
-    font-size: 2rem;
-    color: #ffc107;
-    margin-right: 15px;
+  font-size: 2rem;
+  color: #ffc107;
+  margin-right: 15px;
 }
 
 .puzzle-header h2 {
-    color: #007bff;
-    font-size: 1.8rem;
+  color: #007bff;
+  font-size: 1.8rem;
+  flex-grow: 1;
 }
 
 .puzzle-question {
-    font-size: 1.3rem;
-    color: #333;
-    margin-bottom: 20px;
-    line-height: 1.8;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    border-left: 4px solid #007bff;
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 20px;
+  line-height: 1.8;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #007bff;
 }
 
 .prize-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    color: white;
-    padding: 15px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 
 .prize-info i {
-    margin-right: 10px;
-    font-size: 1.3rem;
+  margin-right: 10px;
+  font-size: 1.3rem;
 }
 
-/* Form Styles */
+/* Hints Section */
+.hints-section {
+  border-top: 1px solid #e9ecef;
+  padding-top: 20px;
+}
+
+.hints-container {
+  animation: slideDown 0.3s ease;
+}
+
+.hints-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.hints-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 123, 255, 0.1);
+  color: #495057;
+}
+
+.hints-list li:last-child {
+  border-bottom: none;
+}
+
+.hints-list li:before {
+  content: "💡";
+  margin-right: 8px;
+}
+
+/* Form Styles - Enhanced Bootstrap Integration */
 .answer-form {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.form-group {
-    margin-bottom: 25px;
+.form-label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
 }
 
-.form-group label {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #333;
-    font-size: 1.1rem;
+.form-label i {
+  margin-right: 10px;
+  color: #007bff;
+  width: 20px;
 }
 
-.form-group label i {
-    margin-right: 10px;
-    color: #007bff;
-    width: 20px;
+.form-control {
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.submit-btn {
-    width: 100%;
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    color: white;
-    border: none;
-    padding: 18px;
-    border-radius: 10px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.btn-primary:hover {
+  background: linear-gradient(45deg, #0056b3, #004085);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 
-.submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+.btn-primary:disabled {
+  background: #6c757d;
+  transform: none;
+  box-shadow: none;
 }
 
-.submit-btn:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+.btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.submit-btn i {
-    margin-right: 10px;
+.btn-outline-secondary:hover {
+  background: #6c757d;
+  border-color: #6c757d;
+  transform: translateY(-1px);
 }
 
-/* Winner Section */
-.winner-section {
-    margin-bottom: 30px;
+.btn-info {
+  background: linear-gradient(45deg, #17a2b8, #138496);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
 }
 
-.winner-card {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+.btn-info:hover {
+  background: linear-gradient(45deg, #138496, #0f6674);
+  transform: translateY(-1px);
 }
 
-.winner-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #e9ecef;
+/* Toast Styles (Bootstrap Override) */
+.toast {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: none;
 }
 
-.winner-header i {
-    font-size: 2.5rem;
-    color: #ffc107;
-    margin-right: 15px;
+.toast-header {
+  background: transparent;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
 }
 
-.winner-header h2 {
-    color: #007bff;
-    font-size: 2rem;
+.toast.success .toast-header {
+  color: #28a745;
 }
 
-.winner-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+.toast.error .toast-header {
+  color: #dc3545;
 }
 
-.winner-avatar {
-    margin-right: 30px;
+.toast.info .toast-header {
+  color: #007bff;
 }
 
-.winner-avatar i {
-    font-size: 4rem;
-    color: #007bff;
-    background: #e3f2fd;
-    padding: 20px;
-    border-radius: 50%;
-}
-
-.winner-details h3 {
-    color: #333;
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-}
-
-.winner-details p {
-    color: #6c757d;
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-}
-
-.winner-prize {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(45deg, #28a745, #20c997);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.winner-prize i {
-    margin-right: 8px;
-}
-
-/* Congratulations Section */
-.congratulations-section {
-    margin-bottom: 30px;
+/* Congratulations Styles */
+.congratulations-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  animation: fadeIn 0.5s ease;
 }
 
 .congratulations-card {
-    background: linear-gradient(45deg, #28a745, #20c997);
-    color: white;
-    border-radius: 15px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
-    animation: celebration 1s ease-in-out;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
+  animation: celebration 0.8s ease-in-out;
+  position: relative;
 }
 
 .celebration-animation {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .celebration-animation i {
-    font-size: 2rem;
-    margin: 0 10px;
-    animation: twinkle 1.5s infinite;
-    color: #ffc107;
+  font-size: 2rem;
+  margin: 0 10px;
+  animation: twinkle 1.5s infinite;
+  color: #ffc107;
+  position: absolute;
+}
+
+.celebration-animation i:nth-child(1) {
+  left: -40px;
+  animation-delay: 0s;
 }
 
 .celebration-animation i:nth-child(2) {
-    animation-delay: 0.5s;
+  left: 0px;
+  animation-delay: 0.5s;
 }
 
 .celebration-animation i:nth-child(3) {
-    animation-delay: 1s;
+  left: 40px;
+  animation-delay: 1s;
 }
 
 .congratulations-card h2 {
-    font-size: 2.2rem;
-    margin-bottom: 15px;
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  margin-top: 30px;
 }
 
 .congratulations-card p {
-    font-size: 1.2rem;
-    margin-bottom: 20px;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
 }
 
 .prize-announcement {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-    font-size: 1.3rem;
-    font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .prize-announcement i {
-    margin-right: 10px;
-    font-size: 1.5rem;
+  margin-right: 10px;
+  font-size: 1.5rem;
 }
 
 .contact-info {
-    font-size: 1rem;
-    opacity: 0.9;
+  font-size: 1rem;
+  opacity: 0.9;
 }
 
-/* Message Styles */
-.error-message, .success-message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    z-index: 1001;
-    max-width: 400px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    animation: slideIn 0.3s ease;
+.close-congratulations {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-.error-message {
-    background: #dc3545;
-    color: white;
-}
-
-.success-message {
-    background: #28a745;
-    color: white;
-}
-
-.error-message i, .success-message i {
-    margin-right: 10px;
-    font-size: 1.2rem;
-}
-
-.error-close, .success-close {
-    background: none;
-    border: none;
-    color: white;
-    margin-left: auto;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: background 0.3s ease;
-}
-
-.error-close:hover, .success-close:hover {
-    background: rgba(255, 255, 255, 0.2);
+.close-congratulations:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Footer */
 .footer {
-    text-align: center;
-    margin-top: 40px;
-    padding: 20px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
+  text-align: center;
+  margin-top: 40px;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.footer small {
+  display: block;
+  margin-top: 10px;
+  opacity: 0.7;
 }
 
 /* Animations */
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 @keyframes twinkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.5; transform: scale(1.2) rotate(180deg); }
 }
 
 @keyframes celebration {
-    0% { transform: scale(0.8); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.8) rotate(-5deg); opacity: 0; }
+  50% { transform: scale(1.05) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+@keyframes slideDown {
+  from { 
+      opacity: 0; 
+      transform: translateY(-10px); 
+      max-height: 0;
+  }
+  to { 
+      opacity: 1; 
+      transform: translateY(0); 
+      max-height: 200px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  60% { transform: translateY(-5px); }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-    
-    .header-content h1 {
-        font-size: 2rem;
-    }
-    
-    .header-icon {
-        font-size: 3rem;
-    }
-    
-    .puzzle-card, .answer-form, .winner-card, .congratulations-card {
-        padding: 20px;
-    }
-    
-    .winner-info {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .winner-avatar {
-        margin-right: 0;
-        margin-bottom: 20px;
-    }
-    
-    .error-message, .success-message {
-        position: relative;
-        top: auto;
-        right: auto;
-        margin: 10px 0;
-        max-width: 100%;
-    }
+  .container {
+      padding: 15px;
+  }
+  
+  .header-content h1 {
+      font-size: 2rem;
+  }
+  
+  .header-icon {
+      font-size: 3rem;
+  }
+  
+  .puzzle-card, .answer-form {
+      padding: 20px;
+  }
+  
+  .puzzle-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+  }
+  
+  .puzzle-header .btn {
+      align-self: flex-end;
+  }
+  
+  .winner-details-status {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+  }
+  
+  .congratulations-card {
+      padding: 30px 20px;
+      margin: 20px;
+  }
+  
+  .congratulations-card h2 {
+      font-size: 1.8rem;
+  }
+  
+  .celebration-animation i {
+      font-size: 1.5rem;
+  }
 }
 
 @media (max-width: 480px) {
-    .header-content h1 {
-        font-size: 1.5rem;
-    }
-    
-    .puzzle-question {
-        font-size: 1.1rem;
-    }
-    
-    .congratulations-card h2 {
-        font-size: 1.8rem;
-    }
-    
-    .form-group input {
-        padding: 12px;
-    }
-    
-    .submit-btn {
-        padding: 15px;
-        font-size: 1.1rem;
-    }
+  .header-content h1 {
+      font-size: 1.5rem;
+  }
+  
+  .puzzle-question {
+      font-size: 1.1rem;
+      padding: 15px;
+  }
+  
+  .congratulations-card h2 {
+      font-size: 1.6rem;
+  }
+  
+  .form-control {
+      padding: 12px;
+  }
+  
+  .btn-lg {
+      padding: 15px;
+      font-size: 1.1rem;
+  }
+  
+  .prize-announcement {
+      font-size: 1.1rem;
+      padding: 15px;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .puzzle-card, .answer-form, .game-status {
+      background: rgba(255, 255, 255, 0.95);
+  }
+  
+  .form-control {
+      background: white;
+      color: #333;
+  }
+  
+  .toast {
+      background: rgba(255, 255, 255, 0.95);
+      color: #333;
+  }
+}
+
+/* Print styles */
+@media print {
+  .header, .footer, .btn, .toast-container {
+      display: none !important;
+  }
+  
+  .puzzle-card, .answer-form {
+      box-shadow: none;
+      border: 1px solid #ddd;
+  }
+  
+  body {
+      background: white;
+      color: black;
+  }
 }
