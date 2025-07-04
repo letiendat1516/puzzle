@@ -1,452 +1,470 @@
-// Main JavaScript for Puzzle Game
+// Puzzle Game Main Script
 class PuzzleGame {
-    constructor() {
-        this.isLoading = false;
-        this.lastSubmissionTime = 0;
-        this.state = {
-            isCompleted: false,
-            winner: null,
-            completedAt: null
-        };
-        
-        this.init();
-    }
+  constructor() {
+      this.state = {
+          isCompleted: false,  // ✅ Changed from 'solved' to match Gist format
+          winner: null,
+          completedAt: null    // ✅ Changed from 'solvedAt' to match Gist format
+      };
+      this.isLoading = false;
+      this.lastSubmissionTime = 0;
+      this.retryCount = 0;
+      
+      this.init();
+  }
 
-    async init() {
-        // Validate configuration first
-        if (!ConfigHelper.isValid()) {
-            this.showError("Cấu hình ứng dụng chưa đúng. Vui lòng kiểm tra lại.");
-            return;
-        }
+  async init() {
+      console.log('🎮 Initializing Puzzle Game...');
+      
+      // Validate configuration
+      if (!ConfigHelper.isValid()) {
+          this.showError('Cấu hình game không hợp lệ. Vui lòng kiểm tra lại.');
+          return;
+      }
 
-        // Load puzzle question
-        this.loadPuzzleQuestion();
-        
-        // Check state from localStorage first (for quick loading)
-        this.loadCachedState();
-        
-        // Then check from GitHub Gist
-        await this.checkGameState();
-        
-        // Setup event listeners
-        this.setupEventListeners();
-        
-        // Hide loading overlay
-        this.hideLoading();
-    }
+      // Load initial state
+      await this.checkGameState();
+      
+      // Setup event listeners
+      this.setupEventListeners();
+      
+      // Update UI
+      this.updateUI();
+      
+      console.log('✅ Puzzle Game initialized successfully');
+  }
 
-    loadPuzzleQuestion() {
-        const questionElement = document.getElementById('puzzle-question');
-        const prizeElement = document.getElementById('prize-amount');
-        const winnerPrizeElement = document.getElementById('winner-prize');
-        
-        if (questionElement) {
-            questionElement.textContent = CONFIG.puzzle.question;
-        }
-        
-        if (prizeElement) {
-            prizeElement.textContent = `Phần thưởng: ${CONFIG.puzzle.prizeAmount}`;
-        }
-        
-        if (winnerPrizeElement) {
-            winnerPrizeElement.textContent = `Phần thưởng: ${CONFIG.puzzle.prizeAmount}`;
-        }
-    }
+  setupEventListeners() {
+      const form = document.getElementById('puzzleForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const showHintsBtn = document.getElementById('showHints');
+      const refreshBtn = document.getElementById('refreshBtn');
 
-    loadCachedState() {
-        try {
-            const cached = localStorage.getItem('puzzleGameState');
-            if (cached) {
-                this.state = JSON.parse(cached);
-                this.updateUI();
-            }
-        } catch (e) {
-            console.warn('Failed to load cached state:', e);
-        }
-    }
+      if (form) {
+          form.addEventListener('submit', (e) => this.handleSubmit(e));
+      }
 
-    async checkGameState() {
-        try {
-            this.isLoading = true;
-            const response = await this.fetchWithRetry(ConfigHelper.getGistUrl(), {
-                headers: {
-                    'Authorization': `Bearer ${CONFIG.github.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const gistData = await response.json();
-            const fileContent = gistData.files[CONFIG.github.filename];
-            
-            if (fileContent && fileContent.content) {
-                const gameState = JSON.parse(fileContent.content);
-                this.state = gameState;
-                
-                // Cache the state
-                localStorage.setItem('puzzleGameState', JSON.stringify(gameState));
-            }
-            
-            this.updateUI();
-        } catch (error) {
-            console.error('Failed to check game state:', error);
-            this.showError("Không thể kiểm tra trạng thái game. Vui lòng thử lại.");
-        } finally {
-            this.isLoading = false;
-        }
-    }
+      if (submitBtn) {
+          submitBtn.addEventListener('click', (e) => this.handleSubmit(e));
+      }
 
-    async fetchWithRetry(url, options = {}, retries = CONFIG.github.maxRetries) {
-        for (let i = 0; i < retries; i++) {
-            try {
-                const response = await fetch(url, options);
-                return response;
-            } catch (error) {
-                if (i === retries - 1) throw error;
-                await this.delay(CONFIG.github.retryDelay * (i + 1));
-            }
-        }
-    }
+      if (showHintsBtn) {
+          showHintsBtn.addEventListener('click', () => this.toggleHints());
+      }
 
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+      if (refreshBtn) {
+          refreshBtn.addEventListener('click', () => this.refreshGameState());
+      }
 
-    updateUI() {
-        const openStatus = document.getElementById('open-status');
-        const closedStatus = document.getElementById('closed-status');
-        const puzzleSection = document.getElementById('puzzle-section');
-        const winnerSection = document.getElementById('winner-section');
-        const congratsSection = document.getElementById('congratulations-section');
+      // Auto-refresh every 30 seconds
+      setInterval(() => this.checkGameState(), 30000);
+  }
 
-        if (this.state.isCompleted && this.state.winner) {
-            // Game is completed
-            if (openStatus) openStatus.style.display = 'none';
-            if (closedStatus) closedStatus.style.display = 'block';
-            if (puzzleSection) puzzleSection.style.display = 'none';
-            if (winnerSection) winnerSection.style.display = 'block';
-            if (congratsSection) congratsSection.style.display = 'none';
-            
-            this.displayWinnerInfo();
-        } else {
-            // Game is still open
-            if (openStatus) openStatus.style.display = 'block';
-            if (closedStatus) closedStatus.style.display = 'none';
-            if (puzzleSection) puzzleSection.style.display = 'block';
-            if (winnerSection) winnerSection.style.display = 'none';
-            if (congratsSection) congratsSection.style.display = 'none';
-        }
-    }
+  async checkGameState() {
+      try {
+          this.isLoading = true;
+          this.showLoading('Đang kiểm tra trạng thái game...');
 
-    displayWinnerInfo() {
-        const winnerNameElement = document.getElementById('winner-name');
-        const winnerTimeElement = document.getElementById('winner-time');
-        
-        if (this.state.winner && winnerNameElement && winnerTimeElement) {
-            winnerNameElement.textContent = this.state.winner.name;
-            
-            const completedDate = new Date(this.state.completedAt);
-            const formattedTime = completedDate.toLocaleString('vi-VN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            winnerTimeElement.textContent = `Giải đúng vào: ${formattedTime}`;
-        }
-    }
+          const response = await this.fetchWithRetry(ConfigHelper.getGistUrl(), {
+              headers: {
+                  'Authorization': `Bearer ${CONFIG.github.token}`,
+                  'Accept': 'application/vnd.github.v3+json',
+                  'X-GitHub-Api-Version': '2022-11-28'
+              }
+          });
 
-    setupEventListeners() {
-        const form = document.getElementById('answer-form');
-        if (form) {
-            form.addEventListener('submit', (e) => this.handleSubmit(e));
+          if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
 
-            // Input validation
-            const inputs = form.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('input', () => this.validateInput(input));
-                input.addEventListener('blur', () => this.validateInput(input));
-            });
-        }
-    }
+          const gistData = await response.json();
+          const fileContent = gistData.files[CONFIG.github.filename];
 
-    validateInput(input) {
-        const value = input.value.trim();
-        input.classList.remove('error');
-        
-        switch (input.id) {
-            case 'player-name':
-                if (!ConfigHelper.isValidName(value)) {
-                    input.classList.add('error');
-                }
-                break;
-            case 'player-email':
-                if (!ConfigHelper.isValidEmail(value)) {
-                    input.classList.add('error');
-                }
-                break;
-            case 'player-answer':
-                if (!ConfigHelper.isValidAnswer(value)) {
-                    input.classList.add('error');
-                }
-                break;
-        }
-    }
+          if (fileContent && fileContent.content) {
+              const gistState = JSON.parse(fileContent.content);
+              
+              // ✅ Updated mapping to match Gist format
+              this.state = {
+                  isCompleted: gistState.isCompleted || false,
+                  winner: gistState.winner,
+                  completedAt: gistState.completedAt
+              };
 
-    async handleSubmit(event) {
-        event.preventDefault();
-        
-        // Check submission cooldown
-        const now = Date.now();
-        if (now - this.lastSubmissionTime < CONFIG.security.submissionCooldown) {
-            this.showError("Vui lòng chờ một chút trước khi gửi lại.");
-            return;
-        }
-        
-        if (this.isLoading) {
-            return;
-        }
+              // Cache state locally
+              localStorage.setItem('puzzleGameState', JSON.stringify(this.state));
+              console.log('✅ Game state loaded:', this.state);
+          }
 
-        // Get form data
-        const formData = new FormData(event.target);
-        const name = ConfigHelper.sanitizeInput(formData.get('name'));
-        const email = ConfigHelper.sanitizeInput(formData.get('email'));
-        const answer = ConfigHelper.sanitizeInput(formData.get('answer'));
+          this.updateUI();
+          this.hideLoading();
 
-        // Validate inputs
-        if (!ConfigHelper.isValidName(name)) {
-            this.showError("Tên không hợp lệ. Vui lòng nhập từ 2-50 ký tự.");
-            return;
-        }
+      } catch (error) {
+          console.error('Failed to check game state:', error);
+          this.showError("Không thể kiểm tra trạng thái game. Đang sử dụng dữ liệu cache.");
+          
+          // Try to load from cache
+          const cachedState = localStorage.getItem('puzzleGameState');
+          if (cachedState) {
+              this.state = JSON.parse(cachedState);
+              this.updateUI();
+          }
+          
+          this.hideLoading();
+      } finally {
+          this.isLoading = false;
+      }
+  }
 
-        if (!ConfigHelper.isValidEmail(email)) {
-            this.showError("Email không hợp lệ.");
-            return;
-        }
+  async handleSubmit(event) {
+      event.preventDefault();
 
-        if (!ConfigHelper.isValidAnswer(answer)) {
-            this.showError("Đáp án không hợp lệ.");
-            return;
-        }
+      // Check cooldown
+      const now = Date.now();
+      if (now - this.lastSubmissionTime < CONFIG.security.submissionCooldown) {
+          this.showError('Vui lòng đợi một chút trước khi gửi lại.');
+          return;
+      }
 
-        // Check if answer is correct
-        const correctAnswer = ConfigHelper.getCorrectAnswer();
-        if (!correctAnswer) {
-            this.showError("Lỗi hệ thống. Vui lòng thử lại.");
-            return;
-        }
+      // Check if game is already completed
+      if (this.state.isCompleted) {
+          this.showError('Game đã kết thúc. Không thể gửi thêm câu trả lời.');
+          return;
+      }
 
-        if (answer.toLowerCase().trim() !== correctAnswer.toLowerCase().trim()) {
-            this.showError("Đáp án không chính xác. Hãy thử lại!");
-            this.lastSubmissionTime = now;
-            return;
-        }
+      // Get form data
+      const formData = this.getFormData();
+      if (!formData) return;
 
-        // Answer is correct, try to submit
-        await this.submitWinner(name, email);
-        this.lastSubmissionTime = now;
-    }
+      // Validate answer
+      const correctAnswer = ConfigHelper.getCorrectAnswer();
+      if (!correctAnswer) {
+          this.showError('Lỗi hệ thống: Không thể xác thực câu trả lời.');
+          return;
+      }
 
-    async submitWinner(name, email) {
-        try {
-            this.isLoading = true;
-            this.showLoading("Đang kiểm tra và gửi kết quả...");
+      const isCorrect = formData.answer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
 
-            // Check current state first
-            await this.checkGameState();
+      if (isCorrect) {
+          await this.handleCorrectAnswer(formData);
+      } else {
+          this.handleIncorrectAnswer();
+      }
 
-            if (this.state.isCompleted) {
-                this.hideLoading();
-                this.showError("Rất tiếc! Đã có người giải đúng trước bạn.");
-                this.updateUI();
-                return;
-            }
+      this.lastSubmissionTime = now;
+  }
 
-            // Prepare winner data
-            const winnerData = {
-                isCompleted: true,
-                winner: {
-                    name: name,
-                    email: email
-                },
-                completedAt: new Date().toISOString()
-            };
+  getFormData() {
+      const name = document.getElementById('playerName')?.value || '';
+      const email = document.getElementById('playerEmail')?.value || '';
+      const answer = document.getElementById('playerAnswer')?.value || '';
 
-            // Update Gist
-            const updateResponse = await this.updateGist(winnerData);
-            
-            if (updateResponse.ok) {
-                this.state = winnerData;
-                localStorage.setItem('puzzleGameState', JSON.stringify(winnerData));
-                
-                this.hideLoading();
-                this.showCongratulations();
-            } else {
-                const errorText = await updateResponse.text();
-                console.error('Gist update failed:', updateResponse.status, errorText);
-                throw new Error(`Failed to update Gist: ${updateResponse.status} ${updateResponse.statusText}`);
-            }
+      // Sanitize inputs
+      const sanitizedData = {
+          name: ConfigHelper.sanitizeInput(name),
+          email: ConfigHelper.sanitizeInput(email),
+          answer: ConfigHelper.sanitizeInput(answer)
+      };
 
-        } catch (error) {
-            console.error('Failed to submit winner:', error);
-            this.hideLoading();
-            this.showError("Có lỗi xảy ra khi gửi kết quả. Vui lòng thử lại.");
-        } finally {
-            this.isLoading = false;
-        }
-    }
+      // Validate
+      if (!ConfigHelper.isValidName(sanitizedData.name)) {
+          this.showError('Tên không hợp lệ. Vui lòng nhập từ 2-50 ký tự.');
+          return null;
+      }
 
-    async updateGist(data) {
-        const payload = {
-            files: {
-                [CONFIG.github.filename]: {
-                    content: JSON.stringify(data, null, 2)
-                }
-            }
-        };
+      if (!ConfigHelper.isValidEmail(sanitizedData.email)) {
+          this.showError('Email không hợp lệ.');
+          return null;
+      }
 
-        console.log('Updating gist with payload:', payload);
-        console.log('Gist URL:', ConfigHelper.getGistUrl());
+      if (!ConfigHelper.isValidAnswer(sanitizedData.answer)) {
+          this.showError('Câu trả lời không hợp lệ.');
+          return null;
+      }
 
-        return await this.fetchWithRetry(ConfigHelper.getGistUrl(), {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${CONFIG.github.token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-                'User-Agent': 'PuzzleGame/1.0'
-            },
-            body: JSON.stringify(payload)
-        });
-    }
+      return sanitizedData;
+  }
 
-    showCongratulations() {
-        const congratsSection = document.getElementById('congratulations-section');
-        const puzzleSection = document.getElementById('puzzle-section');
-        const openStatus = document.getElementById('open-status');
-        
-        if (congratsSection && puzzleSection && openStatus) {
-            puzzleSection.style.display = 'none';
-            openStatus.style.display = 'none';
-            congratsSection.style.display = 'block';
-            
-            // Auto-refresh to winner view after 5 seconds
-            setTimeout(() => {
-                this.updateUI();
-            }, 5000);
-        }
-    }
+  async handleCorrectAnswer(formData) {
+      try {
+          this.showLoading('Đang xử lý câu trả lời đúng...');
 
-    showLoading(message = "Đang tải...") {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'flex';
-            const text = overlay.querySelector('p');
-            if (text) {
-                text.textContent = message;
-            }
-        }
-    }
+          const completedAt = new Date().toISOString();
+          const winnerInfo = `${formData.name} (${formData.email})`;
 
-    hideLoading() {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-    }
+          // Update Gist
+          await this.updateGist(winnerInfo, completedAt);
 
-    showError(message) {
-        this.showMessage(message, 'error');
-    }
+          // Update local state
+          this.state = {
+              isCompleted: true,
+              winner: winnerInfo,
+              completedAt: completedAt
+          };
 
-    showSuccess(message) {
-        this.showMessage(message, 'success');
-    }
+          // Cache state
+          localStorage.setItem('puzzleGameState', JSON.stringify(this.state));
 
-    showMessage(message, type) {
-        const messageEl = document.getElementById(`${type}-message`);
-        const textEl = document.getElementById(`${type}-text`);
-        
-        if (messageEl && textEl) {
-            textEl.textContent = message;
-            messageEl.style.display = 'flex';
-            
-            // Auto-hide after timeout
-            setTimeout(() => {
-                messageEl.style.display = 'none';
-            }, CONFIG.ui.messageTimeout);
-        }
-    }
+          // Update UI
+          this.updateUI();
+          this.showSuccess(`🎉 Chúc mừng ${formData.name}! Bạn đã giải đúng câu đố và giành được ${CONFIG.puzzle.prizeAmount}!`);
+
+          // Clear form
+          this.clearForm();
+
+      } catch (error) {
+          console.error('Failed to handle correct answer:', error);
+          this.showError('Có lỗi xảy ra khi xử lý câu trả lời. Vui lòng thử lại.');
+      } finally {
+          this.hideLoading();
+      }
+  }
+
+  async updateGist(winner, completedAt) {
+      const payload = {
+          files: {
+              [CONFIG.github.filename]: {
+                  content: JSON.stringify({
+                      isCompleted: true,     // ✅ Changed from 'solved' to match format
+                      winner: winner,
+                      completedAt: completedAt // ✅ Changed from 'solvedAt' to match format
+                  }, null, 2)
+              }
+          }
+      };
+
+      const response = await this.fetchWithRetry(ConfigHelper.getGistUrl(), {
+          method: 'PATCH',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${CONFIG.github.token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'X-GitHub-Api-Version': '2022-11-28'
+          },
+          body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Gist update failed:', response.status, errorText);
+          throw new Error(`Failed to update Gist: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Gist updated successfully:', result.updated_at);
+      return result;
+  }
+
+  handleIncorrectAnswer() {
+      const messages = [
+          'Câu trả lời chưa chính xác. Hãy thử lại! 🤔',
+          'Sai rồi! Đọc kỹ đề bài và thử lại nhé! 💭',
+          'Chưa đúng! Có thể gợi ý sẽ giúp bạn! 💡'
+      ];
+      
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      this.showError(randomMessage);
+  }
+
+  async fetchWithRetry(url, options, maxRetries = CONFIG.github.maxRetries) {
+      for (let i = 0; i <= maxRetries; i++) {
+          try {
+              const response = await fetch(url, options);
+              
+              if (response.status === 403) {
+                  const resetTime = response.headers.get('X-RateLimit-Reset');
+                  if (resetTime) {
+                      const waitTime = (parseInt(resetTime) * 1000) - Date.now();
+                      if (waitTime > 0 && waitTime < 60000) { // Wait max 1 minute
+                          console.log(`Rate limited. Waiting ${Math.ceil(waitTime/1000)} seconds...`);
+                          await this.sleep(waitTime);
+                          continue;
+                      }
+                  }
+              }
+              
+              return response;
+              
+          } catch (error) {
+              console.error(`Attempt ${i + 1} failed:`, error);
+              
+              if (i === maxRetries) {
+                  throw error;
+              }
+              
+              const delay = CONFIG.github.retryDelay * Math.pow(2, i);
+              console.log(`Retrying in ${delay}ms...`);
+              await this.sleep(delay);
+          }
+      }
+  }
+
+  sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  updateUI() {
+      const gameStatus = document.getElementById('gameStatus');
+      const submitBtn = document.getElementById('submitBtn');
+      const form = document.getElementById('puzzleForm');
+
+      if (this.state.isCompleted) {
+          // Game completed
+          if (gameStatus) {
+              gameStatus.innerHTML = `
+                  <div class="alert alert-success">
+                      <h4>🏆 Game Đã Kết Thúc!</h4>
+                      <p><strong>Người chiến thắng:</strong> ${this.state.winner}</p>
+                      <p><strong>Thời gian:</strong> ${new Date(this.state.completedAt).toLocaleString('vi-VN')}</p>
+                      <p><strong>Phần thưởng:</strong> ${CONFIG.puzzle.prizeAmount}</p>
+                  </div>
+              `;
+          }
+
+          if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Game Đã Kết Thúc';
+          }
+
+          if (form) {
+              const inputs = form.querySelectorAll('input, textarea');
+              inputs.forEach(input => input.disabled = true);
+          }
+      } else {
+          // Game active
+          if (gameStatus) {
+              gameStatus.innerHTML = `
+                  <div class="alert alert-info">
+                      <h4>🎯 Game Đang Diễn Ra</h4>
+                      <p>Hãy trả lời câu đố để giành phần thưởng <strong>${CONFIG.puzzle.prizeAmount}</strong>!</p>
+                  </div>
+              `;
+          }
+
+          if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Gửi Câu Trả Lời';
+          }
+
+          if (form) {
+              const inputs = form.querySelectorAll('input, textarea');
+              inputs.forEach(input => input.disabled = false);
+          }
+      }
+  }
+
+  toggleHints() {
+      const hintsContainer = document.getElementById('hintsContainer');
+      const showHintsBtn = document.getElementById('showHints');
+      
+      if (hintsContainer && showHintsBtn) {
+          if (hintsContainer.style.display === 'none' || !hintsContainer.style.display) {
+              hintsContainer.style.display = 'block';
+              showHintsBtn.textContent = 'Ẩn Gợi Ý';
+              
+              // Populate hints
+              const hintsList = hintsContainer.querySelector('.hints-list');
+              if (hintsList && CONFIG.puzzle.hints) {
+                  hintsList.innerHTML = CONFIG.puzzle.hints
+                      .map(hint => `<li>${hint}</li>`)
+                      .join('');
+              }
+          } else {
+              hintsContainer.style.display = 'none';
+              showHintsBtn.textContent = 'Hiện Gợi Ý';
+          }
+      }
+  }
+
+  async refreshGameState() {
+      const refreshBtn = document.getElementById('refreshBtn');
+      if (refreshBtn) {
+          refreshBtn.disabled = true;
+          refreshBtn.textContent = 'Đang Làm Mới...';
+      }
+
+      await this.checkGameState();
+
+      if (refreshBtn) {
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = 'Làm Mới';
+      }
+  }
+
+  clearForm() {
+      const form = document.getElementById('puzzleForm');
+      if (form) {
+          form.reset();
+      }
+  }
+
+  showLoading(message = 'Đang xử lý...') {
+      const loadingEl = document.getElementById('loadingMessage');
+      if (loadingEl) {
+          loadingEl.textContent = message;
+          loadingEl.style.display = 'block';
+      }
+  }
+
+  hideLoading() {
+      const loadingEl = document.getElementById('loadingMessage');
+      if (loadingEl) {
+          loadingEl.style.display = 'none';
+      }
+  }
+
+  showError(message) {
+      this.showMessage(message, 'error');
+  }
+
+  showSuccess(message) {
+      this.showMessage(message, 'success');
+  }
+
+  showMessage(message, type = 'info') {
+      // Remove existing messages
+      const existingMessages = document.querySelectorAll('.game-message');
+      existingMessages.forEach(msg => msg.remove());
+
+      // Create new message
+      const messageEl = document.createElement('div');
+      messageEl.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} game-message`;
+      messageEl.textContent = message;
+      messageEl.style.position = 'fixed';
+      messageEl.style.top = '20px';
+      messageEl.style.right = '20px';
+      messageEl.style.zIndex = '9999';
+      messageEl.style.maxWidth = '400px';
+
+      document.body.appendChild(messageEl);
+
+      // Auto remove after timeout
+      setTimeout(() => {
+          if (messageEl && messageEl.parentNode) {
+              messageEl.remove();
+          }
+      }, CONFIG.ui.messageTimeout);
+  }
 }
 
-// Global functions for UI interactions
-function hideError() {
-    const errorEl = document.getElementById('error-message');
-    if (errorEl) {
-        errorEl.style.display = 'none';
-    }
-}
-
-function hideSuccess() {
-    const successEl = document.getElementById('success-message');
-    if (successEl) {
-        successEl.style.display = 'none';
-    }
-}
-
-// Debug function to test API connectivity
-async function testGistConnection() {
-    try {
-        console.log('Testing Gist connection...');
-        console.log('Gist URL:', ConfigHelper.getGistUrl());
-        console.log('Has token:', !!CONFIG.github.token);
-        
-        const response = await fetch(ConfigHelper.getGistUrl(), {
-            headers: {
-                'Authorization': `Bearer ${CONFIG.github.token}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Gist data:', data);
-            return true;
-        } else {
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-            return false;
-        }
-    } catch (error) {
-        console.error('Connection test failed:', error);
-        return false;
-    }
-}
-
-// Initialize the game when DOM is loaded
+// Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing puzzle game...');
-    
-    // Test connection in development
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log('Development mode detected, testing gist connection...');
-        testGistConnection();
-    }
-    
-    new PuzzleGame();
+  console.log('🚀 Starting Puzzle Game...');
+  
+  // Check if required elements exist
+  const requiredElements = ['puzzleForm', 'submitBtn', 'gameStatus'];
+  const missingElements = requiredElements.filter(id => !document.getElementById(id));
+  
+  if (missingElements.length > 0) {
+      console.error('Missing required elements:', missingElements);
+      alert('Lỗi: Không tìm thấy các thành phần cần thiết của game.');
+      return;
+  }
+  
+  // Initialize game
+  window.puzzleGame = new PuzzleGame();
 });
 
-// Export for testing if in Node.js environment
+// Export for testing
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { PuzzleGame, testGistConnection };
+  module.exports = PuzzleGame;
 }
