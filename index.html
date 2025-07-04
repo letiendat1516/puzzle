@@ -1,162 +1,184 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Game - Giải đố có thưởng</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Game - Giải đố có thưởng</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <i class="fas fa-puzzle-piece header-icon"></i>
-                <h1>Puzzle Game</h1>
-                <p class="subtitle">Giải đố có thưởng - Chỉ người đầu tiên mới được thưởng!</p>
-            </div>
-        </header>
+  <div class="container">
+      <!-- Header -->
+      <header class="header">
+          <div class="header-content">
+              <i class="fas fa-puzzle-piece header-icon"></i>
+              <h1>Puzzle Game</h1>
+              <p class="subtitle">Giải đố có thưởng - Chỉ người đầu tiên mới được thưởng!</p>
+          </div>
+      </header>
 
-        <!-- Loading Overlay -->
-        <div id="loading-overlay" class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Đang kiểm tra trạng thái...</p>
-        </div>
+      <!-- Loading Message -->
+      <div id="loadingMessage" class="loading-message" style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+          </div>
+          <span class="ms-2">Đang kiểm tra trạng thái game...</span>
+      </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Status Section -->
-            <section id="status-section" class="status-section">
-                <div id="open-status" class="status-card status-open" style="display: none;">
-                    <i class="fas fa-door-open"></i>
-                    <h2>Cuộc thi đang diễn ra</h2>
-                    <p>Hãy nhanh tay giải đố để giành phần thưởng!</p>
-                </div>
-                
-                <div id="closed-status" class="status-card status-closed" style="display: none;">
-                    <i class="fas fa-trophy"></i>
-                    <h2>Cuộc thi đã kết thúc</h2>
-                    <p>Đã có người chiến thắng!</p>
-                </div>
-            </section>
+      <!-- Game Status Section -->
+      <section id="gameStatus" class="game-status mb-4">
+          <!-- Content will be populated by JavaScript -->
+      </section>
 
-            <!-- Puzzle Section -->
-            <section id="puzzle-section" class="puzzle-section" style="display: none;">
-                <div class="puzzle-card">
-                    <div class="puzzle-header">
-                        <i class="fas fa-lightbulb"></i>
-                        <h2>Câu đố</h2>
-                    </div>
-                    <div class="puzzle-content">
-                        <p id="puzzle-question" class="puzzle-question"></p>
-                        <div class="prize-info">
-                            <i class="fas fa-gift"></i>
-                            <span id="prize-amount">Phần thưởng: 100,000 VNĐ</span>
-                        </div>
-                    </div>
-                </div>
+      <!-- Main Content -->
+      <main class="main-content">
+          <!-- Puzzle Section -->
+          <section class="puzzle-section">
+              <div class="puzzle-card">
+                  <div class="puzzle-header">
+                      <i class="fas fa-lightbulb"></i>
+                      <h2>Câu đố</h2>
+                      <button id="refreshBtn" class="btn btn-outline-secondary btn-sm ms-auto">
+                          <i class="fas fa-sync-alt"></i>
+                          Làm Mới
+                      </button>
+                  </div>
+                  <div class="puzzle-content">
+                      <p id="puzzleQuestion" class="puzzle-question">
+                          Tôi là con số có 3 chữ số. Chữ số hàng trăm gấp đôi chữ số hàng đơn vị. Tổng các chữ số của tôi là 15. Tôi là số nào?
+                      </p>
+                      <div class="prize-info">
+                          <i class="fas fa-gift"></i>
+                          <span id="prizeAmount">Phần thưởng: 100,000 VNĐ</span>
+                      </div>
+                      
+                      <!-- Hints Section -->
+                      <div class="hints-section mt-3">
+                          <button id="showHints" class="btn btn-info btn-sm">
+                              <i class="fas fa-lightbulb"></i>
+                              Hiện Gợi Ý
+                          </button>
+                          <div id="hintsContainer" class="hints-container mt-2" style="display: none;">
+                              <div class="alert alert-info">
+                                  <h6><i class="fas fa-info-circle"></i> Gợi ý:</h6>
+                                  <ul class="hints-list mb-0">
+                                      <!-- Hints will be populated by JavaScript -->
+                                  </ul>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
-                <!-- Answer Form -->
-                <form id="answer-form" class="answer-form">
-                    <div class="form-group">
-                        <label for="player-name">
-                            <i class="fas fa-user"></i>
-                            Tên của bạn
-                        </label>
-                        <input type="text" id="player-name" name="name" required maxlength="50">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="player-email">
-                            <i class="fas fa-envelope"></i>
-                            Email
-                        </label>
-                        <input type="email" id="player-email" name="email" required maxlength="100">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="player-answer">
-                            <i class="fas fa-key"></i>
-                            Đáp án
-                        </label>
-                        <input type="text" id="player-answer" name="answer" required maxlength="200">
-                    </div>
-                    
-                    <button type="submit" class="submit-btn">
-                        <i class="fas fa-paper-plane"></i>
-                        Gửi đáp án
-                    </button>
-                </form>
-            </section>
+              <!-- Answer Form -->
+              <form id="puzzleForm" class="answer-form mt-4">
+                  <div class="row">
+                      <div class="col-md-6">
+                          <div class="form-group mb-3">
+                              <label for="playerName" class="form-label">
+                                  <i class="fas fa-user"></i>
+                                  Tên của bạn
+                              </label>
+                              <input type="text" 
+                                     id="playerName" 
+                                     name="name" 
+                                     class="form-control" 
+                                     required 
+                                     maxlength="50"
+                                     placeholder="Nhập tên của bạn">
+                          </div>
+                      </div>
+                      
+                      <div class="col-md-6">
+                          <div class="form-group mb-3">
+                              <label for="playerEmail" class="form-label">
+                                  <i class="fas fa-envelope"></i>
+                                  Email
+                              </label>
+                              <input type="email" 
+                                     id="playerEmail" 
+                                     name="email" 
+                                     class="form-control" 
+                                     required 
+                                     maxlength="100"
+                                     placeholder="email@example.com">
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div class="form-group mb-3">
+                      <label for="playerAnswer" class="form-label">
+                          <i class="fas fa-key"></i>
+                          Đáp án
+                      </label>
+                      <input type="text" 
+                             id="playerAnswer" 
+                             name="answer" 
+                             class="form-control" 
+                             required 
+                             maxlength="200"
+                             placeholder="Nhập đáp án của bạn">
+                  </div>
+                  
+                  <div class="d-grid">
+                      <button type="submit" id="submitBtn" class="btn btn-primary btn-lg">
+                          <i class="fas fa-paper-plane"></i>
+                          Gửi Câu Trả Lời
+                      </button>
+                  </div>
+              </form>
+          </section>
+      </main>
 
-            <!-- Winner Section -->
-            <section id="winner-section" class="winner-section" style="display: none;">
-                <div class="winner-card">
-                    <div class="winner-header">
-                        <i class="fas fa-crown"></i>
-                        <h2>Người chiến thắng</h2>
-                    </div>
-                    <div class="winner-info">
-                        <div class="winner-avatar">
-                            <i class="fas fa-user-crown"></i>
-                        </div>
-                        <div class="winner-details">
-                            <h3 id="winner-name">-</h3>
-                            <p id="winner-time">-</p>
-                            <div class="winner-prize">
-                                <i class="fas fa-trophy"></i>
-                                <span id="winner-prize">Phần thưởng: 100,000 VNĐ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+      <!-- Footer -->
+      <footer class="footer mt-5">
+          <div class="text-center">
+              <p>&copy; 2025 Puzzle Game. Được tạo bởi GitHub Pages.</p>
+              <small class="text-muted">
+                  <i class="fas fa-info-circle"></i>
+                  Game sử dụng GitHub Gist để lưu trữ dữ liệu
+              </small>
+          </div>
+      </footer>
+  </div>
 
-            <!-- Congratulations Section -->
-            <section id="congratulations-section" class="congratulations-section" style="display: none;">
-                <div class="congratulations-card">
-                    <div class="celebration-animation">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h2>🎉 Chúc mừng bạn đã chiến thắng! 🎉</h2>
-                    <p>Bạn là người đầu tiên giải đúng câu đố!</p>
-                    <div class="prize-announcement">
-                        <i class="fas fa-gift"></i>
-                        <span>Bạn đã nhận được phần thưởng 100,000 VNĐ</span>
-                    </div>
-                    <p class="contact-info">Chúng tôi sẽ liên hệ với bạn qua email để trao thưởng.</p>
-                </div>
-            </section>
-        </main>
+  <!-- Toast Container for Messages -->
+  <div class="toast-container position-fixed top-0 end-0 p-3">
+      <!-- Toasts will be added here by JavaScript -->
+  </div>
 
-        <!-- Error Messages -->
-        <div id="error-message" class="error-message" style="display: none;">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span id="error-text"></span>
-            <button onclick="hideError()" class="error-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 
-        <!-- Success Messages -->
-        <div id="success-message" class="success-message" style="display: none;">
-            <i class="fas fa-check-circle"></i>
-            <span id="success-text"></span>
-            <button onclick="hideSuccess()" class="success-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+  <!-- Additional Script for Helper Functions -->
+  <script>
+      // Helper functions for showing/hiding messages
+      function hideError() {
+          const errorEl = document.getElementById('error-message');
+          if (errorEl) errorEl.style.display = 'none';
+      }
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2024 Puzzle Game. Được tạo bởi GitHub Pages.</p>
-        </footer>
-    </div>
+      function hideSuccess() {
+          const successEl = document.getElementById('success-message');
+          if (successEl) successEl.style.display = 'none';
+      }
 
-    <script src="config.js"></script>
-    <script src="script.js"></script>
+      // Debug function
+      function debugGame() {
+          if (window.puzzleGame) {
+              console.log('🎮 Game State:', window.puzzleGame.state);
+              console.log('🔧 Config Info:', ConfigHelper.getConfigInfo());
+          } else {
+              console.log('❌ Game not initialized');
+          }
+      }
+
+      // Make debug function available globally
+      window.debugGame = debugGame;
+  </script>
 </body>
 </html>
